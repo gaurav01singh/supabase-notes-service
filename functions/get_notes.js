@@ -1,20 +1,51 @@
-// get_notes/index.js
-
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient('https://qdeuttdushjmtlcovhjr.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXV0dGR1c2hqbXRsY292aGpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MjcyNTksImV4cCI6MjA2MTUwMzI1OX0.vfVVhdlCHHg98LrqeyU3WDwxNEapsZy1OGW98009lds');
-
-module.exports = async (req, res) => {
-  const user_id = req.user.id; // Assuming you have user context
-
-  const { data, error } = await supabase
-    .from('notes')
-    .select('*')
-    .eq('user_id', user_id);
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
+Deno.serve(async (req)=>{
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
+    });
   }
-
-  return res.status(200).json(data);
-};
+  try {
+    // Handle GET request
+    if (req.method === 'GET') {
+      // Create Supabase client
+      const supabaseClient = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_ANON_KEY'));
+      // Query the "notes" table to retrieve all notes
+      const { data, error } = await supabaseClient.from('notes').select('*');
+      if (error) throw error;
+      // Return the fetched notes as JSON
+      return new Response(JSON.stringify(data), {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        status: 200
+      });
+    } else {
+      // Handle other request types (like POST)
+      return new Response(JSON.stringify({
+        error: 'Method Not Allowed'
+      }), {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        status: 405
+      });
+    }
+  } catch (error) {
+    return new Response(JSON.stringify({
+      error: error.message,
+      message: 'Error fetching notes'
+    }), {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      status: 400
+    });
+  }
+});

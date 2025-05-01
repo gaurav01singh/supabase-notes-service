@@ -1,25 +1,46 @@
-// supabase/functions/post_notes/index.js
-
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const supabase = createClient(
-  'https://qdeuttdushjmtlcovhjr.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXV0dGR1c2hqbXRsY292aGpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MjcyNTksImV4cCI6MjA2MTUwMzI1OX0.vfVVhdlCHHg98LrqeyU3WDwxNEapsZy1OGW98009lds'
-);
-exports.handler = async (req, res) => {
-  try {
-    const body = await req.json(); // For Edge Functions format
-    const { title, content } = body;
-
-    return new Response(JSON.stringify({
-      message: "Note created",
-      note: { title, content }
-    }), { status: 200 });
-
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500
+import { createClient } from "jsr:@supabase/supabase-js@2";
+Deno.serve(async (req)=>{
+  if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      }
     });
   }
-};
-
+  try {
+    const supabaseClient = createClient(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_ANON_KEY"));
+    const { title, content } = await req.json();
+    // Insert note with user_id
+    const { data, error } = await supabaseClient.from("notes").insert([
+      {
+        title,
+        content
+      }
+    ]);
+    if (error) throw error;
+    return new Response(JSON.stringify({
+      data: {
+        title,
+        content
+      },
+      message: "success"
+    }), {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      status: 201
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      error: error.message,
+      message: "asdasd"
+    }), {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      status: 400
+    });
+  }
+});
