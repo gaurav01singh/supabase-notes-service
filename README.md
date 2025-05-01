@@ -1,6 +1,5 @@
  
 - Primary Key: `uuid` for global uniqueness across distributed systems.
-- `user_id` (uuid): Links notes to users via Supabase's auth.
 - `title`: Text for note title (required).
 - `content`: Optional detailed content.
 - `created_at`: Auto-filled timestamp for note creation.
@@ -49,7 +48,7 @@
 
 #### Create a Note
 ```bash
-curl -X POST 'https://qdeuttdushjmtlcovhjr.supabase.co/functions/v1/notes' \
+curl -X POST '[https://qdeuttdushjmtlcovhjr.supabase.co/functions/v1/post_notes](https://qdeuttdushjmtlcovhjr.supabase.co/functions/v1/post_notes)' \
 -H "Authorization: Bearer <your-access-token>" \
 -H "Content-Type: application/json" \
 -d '{
@@ -70,7 +69,7 @@ curl -X POST 'https://qdeuttdushjmtlcovhjr.supabase.co/functions/v1/notes' \
 
 #### List Notes
 ```bash
-curl -X GET 'https://qdeuttdushjmtlcovhjr.supabase.co/functions/v1/notes' \
+curl -X GET '[https://qdeuttdushjmtlcovhjr.supabase.co/functions/v1/get_notes](https://qdeuttdushjmtlcovhjr.supabase.co/functions/v1/get_notes)' \
 -H "Authorization: Bearer <your-access-token>"
 ```
 **Sample Response**:
